@@ -13,6 +13,7 @@ class WSP {
     this.wspStoreFilePath = path.join(options.dataPath || __dirname, 'wsp-data.json');
     this.wspStore = {};
     this.sessionsMap = {};
+    this.onMessageHandlers = [];
     try {
       this.wspStore = JSON.parse(fs.readFileSync(this.wspStoreFilePath, 'utf-8'));
     } catch (err) {}
@@ -48,6 +49,30 @@ class WSP {
         if (options.updateStoreData) {
           this._updateWSPStoreData();
         }
+        client.onMessage((messageData) => {
+          this.onMessageHandlers.forEach(handler => {
+            handler({
+              sessionKey: key,
+              message: {
+                id: messageData.id,
+                from: messageData.from,
+                to: messageData.to,
+                isForwarded: messageData.isForwarded,
+                timestamp: messageData.timestamp,
+                content: messageData.content,
+                fromMe: messageData.fromMe,
+                sender: {
+                  id: messageData.sender.id,
+                  name: messageData.sender.name,
+                  shortName: messageData.sender.shortName,
+                },
+                chat: {
+                  id: messageData.chat.id,
+                }
+              }
+            })
+          })
+        })
         resolve(client);
       }).catch(err => {
         this.sessionsMap[key] = { error: err }
@@ -79,6 +104,10 @@ class WSP {
 
   _updateWSPStoreData () {
     fs.writeFileSync(this.wspStoreFilePath, JSON.stringify(this.wspStore));
+  }
+
+  onMessage (handler) {
+    this.onMessageHandlers.push(handler);
   }
 
   addSession (key) {
