@@ -42,3 +42,18 @@ app.use('/qrs-store', express.static(path.join( dataPath, 'qrs' )));
     res.send({ details: 'Session removed' });
     res.end();
   });
+
+  // Send message
+  app.post('/session/:sessionKey/send-message', (req, res) => {
+    wsp.sendMessage(req.params.sessionKey, req.body).then(() => {
+      res.status(200);
+      res.send({
+        details: 'Message sent',
+      });
+      res.end();
+    }).catch(err => {
+      res.status(500);
+      res.send(err);
+      res.end();
+    });
+  });
