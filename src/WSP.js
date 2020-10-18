@@ -15,6 +15,7 @@ class WSP {
     this.wspStore = {};
     this.sessionsMap = {};
     this.onMessageHandlers = [];
+    fs.ensureDirSync(options.dataPath);
     try {
       this.wspStore = JSON.parse(fs.readFileSync(this.wspStoreFilePath, 'utf-8'));
     } catch (err) {}
