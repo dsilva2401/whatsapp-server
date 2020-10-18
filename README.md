@@ -11,7 +11,7 @@ Creates a WhatsApp session for an specific number
 ```js
 // Body
 {
-  "phoneNumber": "xxxxxxxxx",
+  "phoneNumber": "xxxxxxxxx", // phone
   "onMessageWebhook": { // Optional
     "method": "[WEBHOOK_METHOD]",
     "url": "[WEBHOOK_URL]"
@@ -19,7 +19,7 @@ Creates a WhatsApp session for an specific number
 }
 ```
 
-#### Remove WhatsApp number session: `DELETE => /session/:number`
+#### Remove WhatsApp number session: `DELETE => /session/:phone`
 
 Removes a WhatsApp session
 
