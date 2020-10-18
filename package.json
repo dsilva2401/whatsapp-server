@@ -1,0 +1,23 @@
+{
+  "name": "whatsapp-server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dsilva2401/whatsapp-server.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/dsilva2401/whatsapp-server/issues"
+  },
+  "homepage": "https://github.com/dsilva2401/whatsapp-server#readme",
+  "dependencies": {
+    "@open-wa/wa-automate": "^2.1.6"
+  }
+}
