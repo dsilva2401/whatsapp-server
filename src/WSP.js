@@ -32,6 +32,7 @@ class WSP {
   }
 
   _startWSPClient (key, options) {
+    options = options || {};
     var wspSessionsPath =  this.dataPath || __dirname;
     var wspSessionFileName = key+WSP_WA_LIB_SESSION_DATA_NAME_ATTACH;
     try {
@@ -153,6 +154,18 @@ class WSP {
       }).catch(err => {
         reject(err);
       });
+    });
+  }
+
+  initSession (key) {
+    this.wspStore.storedSessions = this.wspStore.storedSessions || {};
+    return new Promise((resolve, reject) => {
+      if (this.sessionsMap[key] && this.sessionsMap[key].client) {
+        resolve(this.sessionsMap[key].client);
+        return;
+      }
+      this._startWSPClient(key, { updateStoreData: true }).then((client) => {}).catch(err => {});
+      resolve();
     });
   }
 

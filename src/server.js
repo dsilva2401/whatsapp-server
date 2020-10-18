@@ -21,7 +21,7 @@ app.use('/qrs-store', express.static(path.join( dataPath, 'qrs' )));
   // Register session
   app.post('/session', (req, res) => {
     var phoneNumber = req.body.phoneNumber;
-    wsp.addSession(phoneNumber).then(() => {
+    wsp.initSession(phoneNumber).then(() => {
       res.status(200);
       res.send({
         details: 'Session registered',
@@ -45,10 +45,11 @@ app.use('/qrs-store', express.static(path.join( dataPath, 'qrs' )));
 
   // Send message
   app.post('/session/:sessionKey/send-message', (req, res) => {
-    wsp.sendMessage(req.params.sessionKey, req.body).then(() => {
+    wsp.sendMessage(req.params.sessionKey, req.body).then((resp) => {
       res.status(200);
       res.send({
         details: 'Message sent',
+        data: resp
       });
       res.end();
     }).catch(err => {
@@ -57,3 +58,9 @@ app.use('/qrs-store', express.static(path.join( dataPath, 'qrs' )));
       res.end();
     });
   });
+
+
+// Start server
+app.listen(3000, () => {
+  console.log('Server is running at port 3000');
+})
