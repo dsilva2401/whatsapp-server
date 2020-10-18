@@ -63,6 +63,7 @@ app.use('/qrs-store', express.static(path.join( dataPath, 'qrs' )));
 
 
 // Start server
-app.listen(3000, () => {
-  console.log('Server is running at port 3000');
+var httpPort = process.env.HTTP_PORT || 3000;
+app.listen(httpPort, () => {
+  console.log('Server is running at port '+httpPort);
 })
