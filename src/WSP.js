@@ -110,6 +110,37 @@ class WSP {
     this.onMessageHandlers.push(handler);
   }
 
+  sendMessage (sessionKey, messageData) {
+    return new Promise((resolve, reject) => {
+      if (!this.sessionsMap[sessionKey]) {
+        reject({ details: 'Invalid session key' });
+        return;
+      }
+      if (!this.sessionsMap[sessionKey].client) {
+        reject({ details: 'Invalid session client' });
+        return;
+      }
+      var promResp = null;
+      switch (messageData.type) {
+        case 'text':
+          promResp = this.sessionsMap[sessionKey].client.sendText(messageData.to, messageData.content)
+        break;
+        case 'image':
+          promResp = this.sessionsMap[sessionKey].client.sendImage(messageData.to, messageData.content, null, messageData.message);
+        break;
+      }
+      if (!promResp) {
+        reject({ details: 'Invalid message type' });
+        return;
+      }
+      promResp.then(resp => {
+        resolve(resp);
+      }).catch(err => {
+        reject(err);
+      })
+    });
+  }
+
   addSession (key) {
     this.wspStore.storedSessions = this.wspStore.storedSessions || {};
     return new Promise((resolve, reject) => {
