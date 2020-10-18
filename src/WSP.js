@@ -149,7 +149,7 @@ class WSP {
         return;
       }
       this._startWSPClient(key, { updateStoreData: true }).then((client) => {
-        resolve(client);
+        resolve({ client: client });
       }).catch(err => {
         reject(err);
       });
