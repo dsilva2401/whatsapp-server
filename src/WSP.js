@@ -1,6 +1,7 @@
 const wa = require('@open-wa/wa-automate');
 const fs = require('fs-extra');
 const path = require('path');
+const request = require('request');
 
 const WSP_WA_LIB_SESSION_DATA_NAME_ATTACH = '.data.json';
 const WSP_QR_DIR_NAME = 'qrs';
@@ -45,33 +46,49 @@ class WSP {
         sessionId: key,
         sessionDataPath: wspSessionsPath
       }).then(client => {
-        this.wspStore.storedSessions[key] = {};
+        this.wspStore.storedSessions[key] = {
+          onMessageWebhook: options.onMessageWebhook || null
+        };
         this.sessionsMap[key] = { client: client }
         if (options.updateStoreData) {
           this._updateWSPStoreData();
         }
         client.onMessage((messageData) => {
-          this.onMessageHandlers.forEach(handler => {
-            handler({
-              sessionKey: key,
-              message: {
-                id: messageData.id,
-                from: messageData.from,
-                to: messageData.to,
-                isForwarded: messageData.isForwarded,
-                timestamp: messageData.timestamp,
-                content: messageData.content,
-                fromMe: messageData.fromMe,
-                sender: {
-                  id: messageData.sender.id,
-                  name: messageData.sender.name,
-                  shortName: messageData.sender.shortName,
-                },
-                chat: {
-                  id: messageData.chat.id,
-                }
+          var messageData = {
+            sessionKey: key,
+            message: {
+              id: messageData.id,
+              from: messageData.from,
+              to: messageData.to,
+              isForwarded: messageData.isForwarded,
+              timestamp: messageData.timestamp,
+              content: messageData.content,
+              fromMe: messageData.fromMe,
+              sender: {
+                id: messageData.sender.id,
+                name: messageData.sender.name,
+                shortName: messageData.sender.shortName,
+              },
+              chat: {
+                id: messageData.chat.id,
               }
-            })
+            }
+          }
+          if (options.onMessageWebhook) {
+            request({
+              method: options.onMessageWebhook.method || 'POST',
+              url: options.onMessageWebhook.url,
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                originNumber: messageData.sessionKey,
+                messageData: messageData.message
+              })
+            }, (err, resp) => {});
+          }
+          this.onMessageHandlers.forEach(handler => {
+            handler(messageData);
           })
         })
         resolve(client);
@@ -93,7 +110,9 @@ class WSP {
           return;
         }
         var buffSessionData = buffStoredSessionsList.shift();
-        this._startWSPClient(buffSessionData.key).then(() => {
+        this._startWSPClient(buffSessionData.key, {
+          onMessageWebhook: buffSessionData.data.onMessageWebhook || null
+        }).then(() => {
           _fn();
         }).catch(err => {
           _fn();
@@ -157,14 +176,18 @@ class WSP {
     });
   }
 
-  initSession (key) {
+  initSession (key, options) {
+    options = options || {}
     this.wspStore.storedSessions = this.wspStore.storedSessions || {};
     return new Promise((resolve, reject) => {
       if (this.sessionsMap[key] && this.sessionsMap[key].client) {
         resolve(this.sessionsMap[key].client);
         return;
       }
-      this._startWSPClient(key, { updateStoreData: true }).then((client) => {}).catch(err => {});
+      this._startWSPClient(key, {
+        updateStoreData: true,
+        onMessageWebhook: options.onMessageWebhook || null
+      }).then((client) => {}).catch(err => {});
       resolve();
     });
   }

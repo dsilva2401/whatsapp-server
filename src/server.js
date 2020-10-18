@@ -21,7 +21,9 @@ app.use('/qrs-store', express.static(path.join( dataPath, 'qrs' )));
   // Register session
   app.post('/session', (req, res) => {
     var phoneNumber = req.body.phoneNumber;
-    wsp.initSession(phoneNumber).then(() => {
+    wsp.initSession(phoneNumber, {
+      onMessageWebhook: req.body.onMessageWebhook || null
+    }).then(() => {
       res.status(200);
       res.send({
         details: 'Session registered',
@@ -36,8 +38,8 @@ app.use('/qrs-store', express.static(path.join( dataPath, 'qrs' )));
   });
 
   // Remove session
-  app.delete('/session', (req, res) => {
-    wsp.removeSession(req.body.phoneNumber);
+  app.delete('/session/:sessionKey', (req, res) => {
+    wsp.removeSession(req.params.sessionKey);
     res.status(200);
     res.send({ details: 'Session removed' });
     res.end();
