@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/dsilva2401/whatsapp-server#readme",
   "dependencies": {
-    "@open-wa/wa-automate": "^2.1.6"
+    "@open-wa/wa-automate": "^2.1.6",
+    "fs-extra": "^9.0.1"
   }
 }

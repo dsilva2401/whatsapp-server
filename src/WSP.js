@@ -1,8 +1,9 @@
 const wa = require('@open-wa/wa-automate');
-const fs = require('fs');
+const fs = require('fs-extra');
 const path = require('path');
 
-const WSP_WA_LIB_SESSION_DATA_NAME_ATTACH = '.data.json'
+const WSP_WA_LIB_SESSION_DATA_NAME_ATTACH = '.data.json';
+const WSP_QR_DIR_NAME = 'qrs';
 
 class WSP {
 
@@ -17,6 +18,16 @@ class WSP {
     } catch (err) {}
     // Start loaded sessions
     this._startStoredSessions().then(() => {}).catch(err => {});
+    // Setup qr 
+    wa.ev.on('qr.**', (qrcode, sessionId) => {
+      var qrsDirPath = path.join(this.dataPath, WSP_QR_DIR_NAME);
+      var qrsFilePath = path.join(qrsDirPath, `qr-${sessionId}.png`);
+      this.sessionsMap[sessionId] = this.sessionsMap[sessionId] || {};
+      this.sessionsMap[sessionId].qrUrl = qrsFilePath;
+      fs.ensureDirSync(qrsDirPath);
+      const imageBuffer = Buffer.from(qrcode.replace('data:image/png;base64,',''), 'base64');
+      fs.writeFileSync(qrsFilePath, imageBuffer);
+    });
   }
 
   _startWSPClient (key, options) {
@@ -92,6 +103,11 @@ class WSP {
     delete this.sessionsMap[key];
     try {
       fs.unlinkSync(path.join(this.dataPath, key+WSP_WA_LIB_SESSION_DATA_NAME_ATTACH))
+    } catch (err) {}
+    try {
+      var qrsDirPath = path.join(this.dataPath, WSP_QR_DIR_NAME);
+      var qrsFilePath = path.join(qrsDirPath, `qr-${key}.png`);
+      fs.unlinkSync(qrsFilePath);
     } catch (err) {}
     this._updateWSPStoreData();
   }
