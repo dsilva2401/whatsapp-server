@@ -60,6 +60,12 @@ class WSP {
             sessionKey: key,
             message: {
               id: messageData.id,
+              type: ({
+                chat: 'text',
+                ppt: 'audio',
+                document: 'file',
+                image: 'image'
+              })[messageData.type],
               from: messageData.from,
               to: messageData.to,
               isForwarded: messageData.isForwarded,
