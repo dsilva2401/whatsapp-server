@@ -45,7 +45,8 @@ class WSP {
     return new Promise((resolve, reject) => {
       wa.create({
         sessionId: key,
-        sessionDataPath: wspSessionsPath
+        sessionDataPath: wspSessionsPath,
+        disableSpins: true,
       }).then(client => {
         this.wspStore.storedSessions[key] = {
           onMessageWebhook: options.onMessageWebhook || null
